@@ -7,8 +7,14 @@ import tensorflow as tf
 from utils.data_utils import *
 from utils.plot_utils import *
 
+from sklearn.metrics import average_precision_score
+
+SEED=2020
+
 class TrainAE:
     def __init__(self):
+        tf.random.set_seed(SEED)
+        np.random.seed(SEED)
         #Get Model
         self.net=AE()
 
@@ -93,5 +99,10 @@ if __name__ == "__main__":
         'x_val':x_val,
         'y_val':y_val
     }
-    
+
     trainer.train(data,num_ep,batch_size)
+
+    #Evaluate Test Data
+    test_recon= trainer.net.recon(x_test)
+    test_dist=tf.reduce_mean(tf.square(x_test-test_recon))
+    print(average_precision_score(y_test, test_dist))
