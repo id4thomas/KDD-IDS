@@ -104,5 +104,5 @@ if __name__ == "__main__":
 
     #Evaluate Test Data
     test_recon= trainer.net.recon(x_test)
-    test_dist=tf.reduce_mean(tf.square(x_test-test_recon))
+    test_dist=np.mean(np.square(x_test - test_recon),axis=1)
     print(average_precision_score(y_test, test_dist))
