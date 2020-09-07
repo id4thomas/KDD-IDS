@@ -32,7 +32,7 @@ class TrainAE:
         x_val=data['x_val']
         y_val=data['y_val']
 
-        
+
         train_losses=[]
         val_losses=[]
 
@@ -67,8 +67,8 @@ class TrainAE:
             val_losses.append(val_recon)
 
             print('Epoch recon loss Train:{:.5f} Val:{:.5f}'.format(ep_loss,val_recon))
-        
-        
+
+
         recon_plot=plot_losses(train_losses,val_losses,'Recon Loss')
         # recon_plot.set_title('Recon Loss')
         recon_plot.savefig('./plot/ae_recon_loss.png')
@@ -77,16 +77,21 @@ class TrainAE:
 if __name__ == "__main__":
     kdd_path='../kdd_data'
     x_train,y_train=get_hdf5_data(kdd_path+'/processed/train.hdf5',labeled=True)
-    x_test,y_test=get_hdf5_data(kdd_path+'/processed/test.hdf5',labeled=True)
-    print(x_train.shape,y_train.shape)
+    x_train,x_val,y_train,y_val=split_data(x_train,y_train)
+    x_train,y_train=filter_atk(x_train,y_train)
 
-    num_ep=1
-    batch_size=512
+    x_test,y_test=get_hdf5_data(kdd_path+'/processed/test.hdf5',labeled=True)
+
+    print("Train {} Val {} Test {}".format(x_train.shape[0],x_val.shape[0],x_test.shape[0]))
+
+    num_ep=10
+    batch_size=128
     trainer=TrainAE()
     data={
         'x_train':x_train,
         'y_train':y_train,
-        'x_val':x_test,
-        'y_val':y_test
+        'x_val':x_val,
+        'y_val':y_val
     }
+    
     trainer.train(data,num_ep,batch_size)
