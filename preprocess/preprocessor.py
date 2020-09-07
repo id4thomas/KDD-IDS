@@ -42,7 +42,7 @@ def to_numeric(df,service_list,flag_list,labeled=False):
     df_data=df.loc[:,FEATURES]
     if labeled:
         df_label=df.loc[:,"label"]
-        df_label = df_label.map(lambda x: 0 if x == 'normal' else 1)  # normal 0, attack 1
+        df_label = df_label.map(lambda x: 0 if x == 'normal.' else 1)  # normal 0, attack 1
         print(df_label.head)
         label=df_label.to_numpy()
         print("data {} label {}".format(df_data.shape,label.shape))
@@ -53,7 +53,7 @@ def to_numeric(df,service_list,flag_list,labeled=False):
 def preprocess(df,service_list,flag_list,labeled=False):
     print(df.shape)
     df_data,label=to_numeric(df,service_list,flag_list,labeled=labeled)
-    
+
     scaler = MinMaxScaler()
     enc = OneHotEncoder(categories=[range(3), range(len(service_list)), range(len(flag_list))])
     numericDataDesc = df_data.loc[:, ["duration","src_bytes", "dst_bytes"]].describe()
@@ -118,7 +118,6 @@ if __name__ == "__main__":
     with h5py.File(kdd_path+'/processed/kddcup.hdf5', 'w') as hdf:
         print('Saving file : {}'.format(kdd_path+'/processed/kddcup.hdf5'))
         hdf['x'] = df_final.values[:]
-    
+
     #Save Label
     np.save(kdd_path+'/processed/kddcup_label.npy',label)
-    
