@@ -26,7 +26,7 @@ print(df['label'].value_counts())
 #Preprocess Data
 df_final,label=preprocess(df,serviceData,flagData,labeled=True)
 
-print(label.shape)
+# print(label.shape)
 #Combine Label
 df_final = np.concatenate((df_final.values, np.expand_dims(label, axis=1)), axis=1)
 df_final = pd.DataFrame(df_final)
@@ -34,7 +34,8 @@ df_final = pd.DataFrame(df_final)
 #Save Data
 with h5py.File(kdd_path+'/processed/kddcup.hdf5', 'w') as hdf:
     print('Saving file : {}'.format(kdd_path+'/processed/kddcup.hdf5'))
-    hdf['x'] = df_final.values[:]
+    hdf['x'] = df_final.values[:,:df_final.shape[1]-1]
+    hdf['y'] = df_final.values[:,df_final.shape[1]-1]
 
 #Save Label
 # np.save(kdd_path+'/processed/kddcup_label.npy',label)
@@ -47,8 +48,10 @@ print("Train {} Test {}".format(train.shape,test.shape))
 
 with h5py.File(kdd_path+'/processed/train.hdf5', 'w') as hdf:
     print('Saving file : {}'.format(kdd_path+'/processed/train.hdf5'))
-    hdf['x'] = df_final.values[:]
+    hdf['x'] = train.values[:,:train.shape[1]-1]
+    hdf['y'] = train.values[:,train.shape[1]-1]
 
 with h5py.File(kdd_path+'/processed/test.hdf5', 'w') as hdf:
     print('Saving file : {}'.format(kdd_path+'/processed/test.hdf5'))
-    hdf['x'] = df_final.values[:]
+    hdf['x'] = train.values[:,:test.shape[1]-1]
+    hdf['y'] = train.values[:,test.shape[1]-1]
