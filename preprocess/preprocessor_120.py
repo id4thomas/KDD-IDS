@@ -125,6 +125,10 @@ if __name__ == "__main__":
 
     #Make Category
     make_cat(df,kdd_path)
+    del df
+
+    #Load 10 pct
+    df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
 
     #Read Service, Flag
     service = open(kdd_path+'/service.txt', 'r')
