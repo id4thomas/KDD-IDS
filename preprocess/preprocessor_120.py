@@ -136,11 +136,15 @@ if __name__ == "__main__":
         make_cat(df,kdd_path)
         del df
 
-    #Load OG Data
-    df = pd.read_csv(kdd_path+'/kddcup.data', names=COLS)
+    data_name='10'
+    # data_name='og'
 
-    #Load 10 pct
-    # df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
+    #Load Data
+    if data_name=='og':
+        df = pd.read_csv(kdd_path+'/kddcup.data', names=COLS)
+    else:
+        #Load 10 pct
+        df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
 
     #Read Service, Flag
     service = open(kdd_path+'/service.txt', 'r')
@@ -162,9 +166,6 @@ if __name__ == "__main__":
     df_final,label=preprocess(df,serviceData,flagData,labeled=True)
 
     save_path='../../kdd_120'
-
-    # data_name='10'
-    data_name='og'
 
     #Save Processed
     with h5py.File(save_path+'/processed/kddcup_{}.hdf5'.format(data_name), 'w') as hdf:
