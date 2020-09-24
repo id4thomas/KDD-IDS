@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, StandardScaler, Normalizer
 from sklearn.utils import shuffle
 
+#Process data into 120 dim vector
 
 COLS = ["duration","protocol_type","service","flag","src_bytes",
     "dst_bytes","land","wrong_fragment","urgent","hot","num_failed_logins",
@@ -118,17 +119,28 @@ def make_cat(df,kdd_path):
 
 
 if __name__ == "__main__":
+    #Set Random Seed
+    SEED=42
+    random.seed(SEED)
+    np.random.seed(SEED)
+
     kdd_path='../../kdd_data'
 
-    #Load DF
-    df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
+    #If need to make category txt file
+    make_cat_file=False
+    if make_cat_file:
+        #Load DF
+        df = pd.read_csv(kdd_path+'/kddcup.data', names=COLS)
 
-    #Make Category
-    make_cat(df,kdd_path)
-    del df
+        #Make Category
+        make_cat(df,kdd_path)
+        del df
+
+    #Load OG Data
+    df = pd.read_csv(kdd_path+'/kddcup.data', names=COLS)
 
     #Load 10 pct
-    df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
+    # df = pd.read_csv(kdd_path+'/kddcup.data_10_percent', names=COLS)
 
     #Read Service, Flag
     service = open(kdd_path+'/service.txt', 'r')
@@ -150,10 +162,33 @@ if __name__ == "__main__":
     df_final,label=preprocess(df,serviceData,flagData,labeled=True)
 
     save_path='../../kdd_120'
-    #Save Data
-    with h5py.File(save_path+'/processed/kddcup_10.hdf5', 'w') as hdf:
-        print('Saving file : {}'.format(save_path+'/processed/kddcup_10.hdf5'))
+
+    # data_name='10'
+    data_name='og'
+
+    #Save Processed
+    with h5py.File(save_path+'/processed/kddcup_{}.hdf5'.format(data_name), 'w') as hdf:
+        print('Saving file : {}'.format(save_path+'/processed/kddcup_{}.hdf5'.format(data_name)))
         hdf['x'] = df_final.values[:]
 
     #Save Label
-    np.save(save_path+'/processed/kddcup_10_label.npy',label)
+    np.save(save_path+'/processed/kddcup_{}_label.npy'.format(data_name),label)
+
+
+    #Split Train/Test
+    df_final = np.concatenate((df_final.values, np.expand_dims(label, axis=1)), axis=1)
+    df_final = pd.DataFrame(df_final)
+    train, test = train_test_split(df_final, test_size=0.5)
+
+    #114 + 1 (Label)
+    print("Train {} Test {}".format(train.shape,test.shape))
+
+    with h5py.File(save_path+'/processed/train_{}.hdf5'.format(data_name), 'w') as hdf:
+        print('Saving file : {}'.format(save_path+'/processed/train_{}.hdf5'.format(data_name)))
+        hdf['x'] = train.values[:,:train.shape[1]-1]
+        hdf['y'] = train.values[:,train.shape[1]-1]
+
+    with h5py.File(save_path+'/processed/test_{}.hdf5'.format(data_name), 'w') as hdf:
+        print('Saving file : {}'.format(save_path+'/processed/test_{}.hdf5'.format(data_name)))
+        hdf['x'] = train.values[:,:test.shape[1]-1]
+        hdf['y'] = train.values[:,test.shape[1]-1]
